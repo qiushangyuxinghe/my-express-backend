@@ -1,43 +1,36 @@
 const mysql = require('mysql2')
 const Mock = require('mockjs')
 
-const getDbConfig = () => {
-  // 如果提供了完整的 DATABASE_URL（如 PlanetScale、Railway）
-  if (process.env.DATABASE_URL) {
-    return {
-      uri: process.env.DATABASE_URL,
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-    }
-  }
-  
-  // 如果提供了分开的数据库配置
-  return {
-    host: process.env.DB_HOST || '127.0.0.1',
-    user: process.env.DB_USER || 'xinghe',
-    password: process.env.DB_PASSWORD || 'Cqy@2005',
-    database: process.env.DB_NAME || 'lists',
-    port: process.env.DB_PORT || 3306,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  }
+const dbConfig = {
+  uri: process.env.DATABASE_URL
 }
 
-const dbConfig = getDbConfig()
-const db = dbConfig.uri 
-  ? mysql.createPool(dbConfig.uri) 
-  : mysql.createPool(dbConfig)
+console.log('数据库连接信息:', {
+  hasDatabaseUrl: !!process.env.DATABASE_URL,
+  urlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
+  urlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : '无'
+})
+
+// 使用连接字符串创建连接池，并正确配置 SSL
+const db = mysql.createPool({
+  uri: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false  // Aiven 需要这个 SSL 配置
+  }
+})
 
 // 测试数据库连接
 db.getConnection((err, connection) => {
   if (err) {
-    console.error('数据库连接失败:', err.message)
-    console.log('当前数据库配置:', {
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      database: process.env.DB_NAME,
-      hasDatabaseUrl: !!process.env.DATABASE_URL
+    console.error('数据库连接失败:', err)
+    console.error('错误详情:', {
+      code: err.code,
+      errno: err.errno,
+      sqlMessage: err.sqlMessage,
+      fatal: err.fatal
     })
   } else {
-    console.log('数据库连接成功')
+    console.log('数据库连接成功!')
     connection.release()
   }
 })
