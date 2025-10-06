@@ -1,11 +1,45 @@
 const mysql = require('mysql2')
 const Mock = require('mockjs')
 
-const db = mysql.createPool({
-    host:'127.0.0.1',//数据库的IP地址
-    user:'xinghe',//登录数据库的账号
-    password:'Cqy@2005',//登录数据库的密码
-    database:'lists'//要操作的数据库
+const getDbConfig = () => {
+  // 如果提供了完整的 DATABASE_URL（如 PlanetScale、Railway）
+  if (process.env.DATABASE_URL) {
+    return {
+      uri: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    }
+  }
+  
+  // 如果提供了分开的数据库配置
+  return {
+    host: process.env.DB_HOST || '127.0.0.1',
+    user: process.env.DB_USER || 'xinghe',
+    password: process.env.DB_PASSWORD || 'Cqy@2005',
+    database: process.env.DB_NAME || 'lists',
+    port: process.env.DB_PORT || 3306,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  }
+}
+
+const dbConfig = getDbConfig()
+const db = dbConfig.uri 
+  ? mysql.createPool(dbConfig.uri) 
+  : mysql.createPool(dbConfig)
+
+// 测试数据库连接
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error('数据库连接失败:', err.message)
+    console.log('当前数据库配置:', {
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      database: process.env.DB_NAME,
+      hasDatabaseUrl: !!process.env.DATABASE_URL
+    })
+  } else {
+    console.log('数据库连接成功')
+    connection.release()
+  }
 })
 
 const length = 200
