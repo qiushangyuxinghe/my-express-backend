@@ -13,24 +13,11 @@ const cors = require('cors')
 app.use(express.json()) // 解析JSON请求体
 app.use(express.urlencoded({ extended: true })) // 解析URL编码请求体
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173',"https://first-project-blue-five.vercel.app"], // 明确指定允许的源
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // 明确指定允许的源
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }))
-if (process.env.NODE_ENV !== 'production' || process.env.INIT_DATA === 'true') {
-    list.init().then(() => {
-        console.log('数据初始化完成')
-    }).catch(err => {
-        console.error('数据初始化失败:', err)
-    })
-}
-app.get('/', (req, res) => {
-    res.json({ 
-        message: 'API 服务运行正常',
-        environment: process.env.NODE_ENV || 'development'
-    })
-})
 
 
 
@@ -138,5 +125,6 @@ app.post('/home/deleteUser',(req,res)=>{
     })
 })
 
-
-module.exports = app;
+app.listen(3002,()=>{
+    console.log(`Example app listening on port http://127.0.0.1:3002`)
+})

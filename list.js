@@ -1,38 +1,11 @@
 const mysql = require('mysql2')
 const Mock = require('mockjs')
 
-const dbConfig = {
-  uri: process.env.DATABASE_URL
-}
-
-console.log('数据库连接信息:', {
-  hasDatabaseUrl: !!process.env.DATABASE_URL,
-  urlLength: process.env.DATABASE_URL ? process.env.DATABASE_URL.length : 0,
-  urlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 30) + '...' : '无'
-})
-
-// 使用连接字符串创建连接池，并正确配置 SSL
 const db = mysql.createPool({
-  uri: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false  // Aiven 需要这个 SSL 配置
-  }
-})
-
-// 测试数据库连接
-db.getConnection((err, connection) => {
-  if (err) {
-    console.error('数据库连接失败:', err)
-    console.error('错误详情:', {
-      code: err.code,
-      errno: err.errno,
-      sqlMessage: err.sqlMessage,
-      fatal: err.fatal
-    })
-  } else {
-    console.log('数据库连接成功!')
-    connection.release()
-  }
+    host:'127.0.0.1',//数据库的IP地址
+    user:'xinghe',//登录数据库的账号
+    password:'Cqy@2005',//登录数据库的密码
+    database:'lists'//要操作的数据库
 })
 
 const length = 200
